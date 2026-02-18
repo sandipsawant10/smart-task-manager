@@ -56,4 +56,29 @@ const getProductivityFeedback = async (tasks) => {
   return feedback;
 };
 
-export { generateTasksFromGoal, getProductivityFeedback };
+const suggestTaskDeadline = async (task) => {
+  if (!task || !task.title) {
+    throw new Error("Task with title is required for deadline suggestion");
+  }
+
+  const prompt = `You are a task management assistant. Suggest an appropriate deadline for the following task:\n\nTask: ${task.title}\n\nDeadline:`;
+  const deadline = await callAI(prompt);
+  return deadline;
+};
+
+const suggestTaskPriority = async (task) => {
+  if (!task || !task.title) {
+    throw new Error("Task with title is required for priority suggestion");
+  }
+
+  const prompt = `You are a task management assistant. Suggest a priority for the following task:\n\nTask: ${task.title}\n\nPriority:`;
+  const priority = await callAI(prompt);
+  return priority.toLowerCase().trim();
+};
+
+export {
+  generateTasksFromGoal,
+  getProductivityFeedback,
+  suggestTaskDeadline,
+  suggestTaskPriority,
+};
