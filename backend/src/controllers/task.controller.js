@@ -8,7 +8,7 @@ const createTask = async (req, res) => {
       return res.status(400).json({ message: "Title is required" });
     }
 
-    const newTask = await new Task.create({
+    const newTask = await Task.create({
       title,
       description,
       priority,

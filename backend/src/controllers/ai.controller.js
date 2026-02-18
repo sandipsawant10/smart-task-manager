@@ -1,10 +1,10 @@
-import Task from "../models/task.model";
+import Task from "../models/task.model.js";
 import {
   generateTasksFromGoal,
   getProductivityFeedback,
   suggestTaskDeadline,
   suggestTaskPriority,
-} from "../utils/aiClient";
+} from "../utils/aiClient.js";
 
 const generateTasks = async (req, res) => {
   try {
@@ -15,10 +15,25 @@ const generateTasks = async (req, res) => {
     }
     const generatedTasks = await generateTasksFromGoal(goal);
 
-    //convert AI text → array
-    const tasksArray = generatedTasks
-      .split("\n")
-      .filter((task) => task.trim() !== "");
+    const normalizeTaskTitle = (text) =>
+      text
+        .replace(/^#+\s*/g, "")
+        .replace(/^[\-\*]\s+/g, "")
+        .replace(/^\d+[\.)]\s+/g, "")
+        .trim();
+
+    let tasksArray = [];
+    try {
+      const parsed = JSON.parse(generatedTasks);
+      if (Array.isArray(parsed)) {
+        tasksArray = parsed.map((task) => String(task));
+      }
+    } catch (parseError) {
+      tasksArray = generatedTasks
+        .split("\n")
+        .map((task) => normalizeTaskTitle(task))
+        .filter((task) => task !== "");
+    }
 
     //save tasks to DB
     const savedTasks = [];
@@ -86,15 +101,19 @@ const suggestDeadline = async (req, res) => {
 const suggestPriority = async (req, res) => {
   try {
     const { taskId } = req.params;
-    const task = Task.findOne({ _id: taskId, user: req.user._id });
+    const task = await Task.findOne({ _id: taskId, user: req.user._id });
     if (!task) {
       return res.status(404).json({ message: "Task not found" });
     }
     const priority = await suggestTaskPriority(task);
-    res.status(200).json({ message: "Priority suggested", suggestion: priority });
+    res
+      .status(200)
+      .json({ message: "Priority suggested", suggestion: priority });
   } catch (error) {
-    
+    res
+      .status(500)
+      .json({ message: "Error suggesting priority", error: error.message });
   }
-}
+};
 
 export { generateTasks, getFeedback, suggestDeadline, suggestPriority };
