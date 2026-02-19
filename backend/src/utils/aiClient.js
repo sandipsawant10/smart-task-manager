@@ -61,9 +61,10 @@ const suggestTaskDeadline = async (task) => {
     throw new Error("Task with title is required for deadline suggestion");
   }
 
-  const prompt = `You are a task management assistant. Return a single concrete deadline date in YYYY-MM-DD format only. No extra text.\n\nTask: ${task.title}\n\nDeadline:`;
+  const today = new Date().toISOString().split("T")[0];
+  const prompt = `You are a task management assistant. Today's date is ${today}. Based on the task, suggest a realistic future deadline date in YYYY-MM-DD format. Return ONLY the date, nothing else.\n\nTask: ${task.title}\n\nDeadline:`;
   const deadline = await callAI(prompt);
-  return deadline;
+  return deadline.trim();
 };
 
 const suggestTaskPriority = async (task) => {
@@ -71,9 +72,16 @@ const suggestTaskPriority = async (task) => {
     throw new Error("Task with title is required for priority suggestion");
   }
 
-  const prompt = `You are a task management assistant. Return only one word: low, medium, or high. No extra text.\n\nTask: ${task.title}\n\nPriority:`;
+  const prompt = `You are a task management assistant. Analyze this task and return ONLY one single word from this list: low, medium, high. Return nothing else - just the priority level.\n\nTask: ${task.title}`;
   const priority = await callAI(prompt);
-  return priority.toLowerCase().trim();
+  const cleaned = priority
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z]/g, "");
+  if (["low", "medium", "high"].includes(cleaned)) {
+    return cleaned;
+  }
+  return "medium";
 };
 
 export {

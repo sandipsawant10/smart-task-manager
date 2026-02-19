@@ -28,7 +28,17 @@ const taskSchema = new mongoose.Schema(
       required: true,
     },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+    toJSON: {
+      transform: function (doc, ret) {
+        if (ret.deadline) {
+          ret.deadline = ret.deadline.toISOString().split("T")[0];
+        }
+        return ret;
+      },
+    },
+  },
 );
 
 const Task = mongoose.model("Task", taskSchema);

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { logout } from "../services/authApi";
 import useTaskManager from "../hooks/useTaskManager";
 import useAI from "../hooks/useAI";
@@ -11,6 +11,7 @@ function Dashboard() {
     tasks,
     loading: taskLoading,
     error: taskError,
+    fetchTasks,
     handleCreateTask,
     handleUpdateTask,
     handleDeleteTask,
@@ -30,6 +31,10 @@ function Dashboard() {
   const [error, setError] = useState(null);
   const loading = taskLoading || aiLoading;
 
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+
   const handleLogout = () => {
     logout();
     window.location.href = "/login";
@@ -38,17 +43,18 @@ function Dashboard() {
   const handleGenerateTasks = async (goal) => {
     const result = await generateTasks(goal);
     if (result.success) {
-      addGeneratedTasks(result.data);
+      addGeneratedTasks(result.tasks);
     } else {
       setError(result.error);
     }
+    return result;
   };
 
   const handleSuggestPriority = async (taskId, taskTitle) => {
     const result = await suggestPriority(taskTitle);
     if (result.success) {
       const updateResult = await handleUpdateTask(taskId, {
-        priority: result.data,
+        priority: result.suggestion,
       });
       if (!updateResult.success) {
         setError(updateResult.error);
@@ -62,7 +68,7 @@ function Dashboard() {
     const result = await suggestDeadline(taskTitle);
     if (result.success) {
       const updateResult = await handleUpdateTask(taskId, {
-        deadline: result.data,
+        deadline: result.suggestion,
       });
       if (!updateResult.success) {
         setError(updateResult.error);
@@ -75,7 +81,7 @@ function Dashboard() {
   const handleProductivityFeedback = async () => {
     const result = await getFeedback();
     if (result.success) {
-      alert(result.data);
+      alert(result.feedback);
     } else {
       setError(result.error);
     }

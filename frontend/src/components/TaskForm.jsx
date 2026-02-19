@@ -13,6 +13,14 @@ const TaskForm = ({ onCreateTask, loading }) => {
       return;
     }
 
+    if (deadline) {
+      const today = new Date().toISOString().split("T")[0];
+      if (deadline < today) {
+        alert("Deadline cannot be in the past");
+        return;
+      }
+    }
+
     const result = await onCreateTask({
       title,
       description,
@@ -53,6 +61,7 @@ const TaskForm = ({ onCreateTask, loading }) => {
       <input
         type="date"
         value={deadline}
+        min={new Date().toISOString().split("T")[0]}
         onChange={(event) => setDeadline(event.target.value)}
       />
       <button type="submit" disabled={loading}>

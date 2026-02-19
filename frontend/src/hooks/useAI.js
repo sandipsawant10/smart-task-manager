@@ -6,7 +6,7 @@ import {
   suggestTaskPriority,
 } from "../services/aiApi";
 
-export const useAI = () => {
+const useAI = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -80,3 +80,5 @@ export const useAI = () => {
     getFeedback,
   };
 };
+
+export default useAI;

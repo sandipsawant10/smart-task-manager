@@ -1,14 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const TaskCard = ({
   task,
+  isEditing,
+  onEdit,
+  onCancelEdit,
   onUpdate,
   onDelete,
   onMarkComplete,
   onSuggestPriority,
   onSuggestDeadline,
 }) => {
-  const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(task.title || "");
   const [editDescription, setEditDescription] = useState(
     task.description || "",
@@ -17,12 +19,29 @@ const TaskCard = ({
   const [editDeadline, setEditDeadline] = useState(
     task.deadline ? task.deadline.slice(0, 10) : "",
   );
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    setEditTitle(task.title || "");
+    setEditDescription(task.description || "");
+    setEditPriority(task.priority || "low");
+    setEditDeadline(task.deadline ? task.deadline.slice(0, 10) : "");
+  }, [task]);
 
   const handleSave = async () => {
-    if (!editTitle.trim()) {
+    if (!editTitle.trim() || isLoading) {
       return;
     }
 
+    if (editDeadline) {
+      const today = new Date().toISOString().split("T")[0];
+      if (editDeadline < today) {
+        alert("Deadline cannot be in the past");
+        return;
+      }
+    }
+
+    setIsLoading(true);
     const result = await onUpdate(task._id, {
       title: editTitle,
       description: editDescription,
@@ -30,8 +49,9 @@ const TaskCard = ({
       deadline: editDeadline,
     });
 
+    setIsLoading(false);
     if (result.success) {
-      setIsEditing(false);
+      onCancelEdit();
     }
   };
 
@@ -40,7 +60,35 @@ const TaskCard = ({
     setEditDescription(task.description || "");
     setEditPriority(task.priority || "low");
     setEditDeadline(task.deadline ? task.deadline.slice(0, 10) : "");
-    setIsEditing(false);
+    onCancelEdit();
+  };
+
+  const handleComplete = async () => {
+    if (isLoading) return;
+    setIsLoading(true);
+    await onMarkComplete(task._id);
+    setIsLoading(false);
+  };
+
+  const handleDelete = async () => {
+    if (isLoading) return;
+    setIsLoading(true);
+    await onDelete(task._id);
+    setIsLoading(false);
+  };
+
+  const handleSuggestPriority = async () => {
+    if (isLoading) return;
+    setIsLoading(true);
+    await onSuggestPriority(task._id, task.title);
+    setIsLoading(false);
+  };
+
+  const handleSuggestDeadline = async () => {
+    if (isLoading) return;
+    setIsLoading(true);
+    await onSuggestDeadline(task._id, task.title);
+    setIsLoading(false);
   };
 
   return (
@@ -68,10 +116,11 @@ const TaskCard = ({
           <input
             type="date"
             value={editDeadline}
+            min={new Date().toISOString().split("T")[0]}
             onChange={(event) => setEditDeadline(event.target.value)}
           />
-          <button onClick={handleSave}>Save</button>
-          <button onClick={handleCancel}>Cancel</button>
+          <button onClick={handleSave} disabled={isLoading}>Save</button>
+          <button onClick={handleCancel} disabled={isLoading}>Cancel</button>
         </div>
       ) : (
         <div>
@@ -81,13 +130,13 @@ const TaskCard = ({
           <p>Deadline: {task.deadline}</p>
           <p>Status: {task.status}</p>
           <div>
-            <button onClick={() => onMarkComplete(task._id)}>Complete</button>
-            <button onClick={() => setIsEditing(true)}>Edit</button>
-            <button onClick={() => onDelete(task._id)}>Delete</button>
-            <button onClick={() => onSuggestPriority(task._id, task.title)}>
+            <button onClick={handleComplete} disabled={isLoading}>Complete</button>
+            <button onClick={onEdit} disabled={isLoading}>Edit</button>
+            <button onClick={handleDelete} disabled={isLoading}>Delete</button>
+            <button onClick={handleSuggestPriority} disabled={isLoading}>
               AI Suggest Priority
             </button>
-            <button onClick={() => onSuggestDeadline(task._id, task.title)}>
+            <button onClick={handleSuggestDeadline} disabled={isLoading}>
               AI Suggest Deadline
             </button>
           </div>
