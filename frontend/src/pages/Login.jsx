@@ -11,16 +11,46 @@ function Login() {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    
-  }
+    e.preventDefault();
+    setError("");
+
+    if (!email || !password) {
+      setError("Email and password are required");
+      return;
+    }
+    setLoading(true);
+    try {
+      const response = await login(email, password);
+      if (response?.token) {
+        localStorage.setItem("token", response.token);
+      }
+      navigate("/");
+    } catch (error) {
+      setError(error.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
-    <form onSubmit={}>
-      <input type="email" />
-      <input type="password" />
-      <button type="submit"></button>
+    <form onSubmit={handleSubmit}>
+      <input
+        type="email"
+        placeholder="Email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+      <input
+        type="password"
+        placeholder="Password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+      <button type="submit" disabled={loading}>
+        {loading ? "Logging in..." : "Login"}
+      </button>
+      {error && <p>{error}</p>}
     </form>
-  )
+  );
 }
 
-export default Login
+export default Login;
