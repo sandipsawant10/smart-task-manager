@@ -11,7 +11,7 @@ const router = Router();
 
 router.post("/generate", verifyJWT, generateTasks);
 router.get("/feedback", verifyJWT, getFeedback);
-router.get("/deadline/:taskId", verifyJWT, suggestDeadline);
-router.get("/priority/:taskId", verifyJWT, suggestPriority);
+router.post("/deadline", verifyJWT, suggestDeadline);
+router.post("/priority", verifyJWT, suggestPriority);
 
 export default router;

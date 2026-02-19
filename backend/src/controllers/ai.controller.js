@@ -82,11 +82,11 @@ const getFeedback = async (req, res) => {
 
 const suggestDeadline = async (req, res) => {
   try {
-    const { taskId } = req.params;
-    const task = await Task.findOne({ _id: taskId, user: req.user._id });
-    if (!task) {
-      return res.status(404).json({ message: "Task not found" });
+    const { title } = req.body;
+    if (!title) {
+      return res.status(400).json({ message: "Task title is required" });
     }
+    const task = { title };
     const deadline = await suggestTaskDeadline(task);
     res
       .status(200)
@@ -100,11 +100,11 @@ const suggestDeadline = async (req, res) => {
 
 const suggestPriority = async (req, res) => {
   try {
-    const { taskId } = req.params;
-    const task = await Task.findOne({ _id: taskId, user: req.user._id });
-    if (!task) {
-      return res.status(404).json({ message: "Task not found" });
+    const { title } = req.body;
+    if (!title) {
+      return res.status(400).json({ message: "Task title is required" });
     }
+    const task = { title };
     const priority = await suggestTaskPriority(task);
     res
       .status(200)
