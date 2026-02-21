@@ -94,9 +94,11 @@ VITE_API_URL=https://smart-task-manager-a621.onrender.com/api
 
 ## Live Demo
 
+🚀 **Frontend**: https://smart-task-manager-liart.vercel.app
+
 🚀 **Backend API**: https://smart-task-manager-a621.onrender.com
 
-The backend is deployed and ready to use. Configure your frontend with the production API URL above.
+The application is fully deployed and ready to use. Access the frontend directly or configure it with the backend API above.
 
 ## Usage
 
