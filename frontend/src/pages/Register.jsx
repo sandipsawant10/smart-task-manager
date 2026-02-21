@@ -8,12 +8,14 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleRegister = async (event) => {
     event.preventDefault();
     setError("");
+    setSuccess("");
     setIsLoading(true);
 
     if (!email.trim() || !password.trim() || !confirmPassword.trim()) {
@@ -43,7 +45,10 @@ const Register = () => {
         setEmail("");
         setPassword("");
         setConfirmPassword("");
-        navigate("/login");
+        setSuccess("Account created successfully! Redirecting to login...");
+        setTimeout(() => {
+          navigate("/login");
+        }, 1500);
       } else {
         setError(result.message || "Registration failed. Please try again.");
       }
@@ -67,6 +72,7 @@ const Register = () => {
         <div className="auth-body">
           <div>
             <h1 className="auth-title">Create Account</h1>
+            {success && <div className="auth-success">{success}</div>}
             <p className="auth-subtitle">Start managing your tasks smarter.</p>
           </div>
 
