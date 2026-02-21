@@ -62,6 +62,7 @@ function Dashboard() {
   }, [showInsights]);
 
   const handleLogout = () => {
+    logout();
     navigate("/login", { replace: true });
     window.location.href = "/login";
   };
