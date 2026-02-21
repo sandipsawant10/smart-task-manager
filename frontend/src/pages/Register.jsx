@@ -40,6 +40,9 @@ const Register = () => {
         localStorage.setItem("token", result.token);
         if (result.user)
           localStorage.setItem("user", JSON.stringify(result.user));
+        setEmail("");
+        setPassword("");
+        setConfirmPassword("");
         navigate("/login");
       } else {
         setError(result.message || "Registration failed. Please try again.");

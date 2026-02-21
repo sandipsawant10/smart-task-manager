@@ -27,6 +27,8 @@ const Login = () => {
         localStorage.setItem("token", result.token);
         if (result.user)
           localStorage.setItem("user", JSON.stringify(result.user));
+        setEmail("");
+        setPassword("");
         navigate("/");
       } else {
         setError(result.message || "Login failed. Please try again.");
