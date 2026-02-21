@@ -64,7 +64,7 @@ function Dashboard() {
   const handleLogout = () => {
     logout();
     navigate("/login", { replace: true });
-    window.location.href = "/login";
+    // window.location.href = "/login";
   };
 
   const handleGenerateTasks = async (goal) => {
