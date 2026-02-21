@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { logout } from "../services/authApi";
 import useTaskManager from "../hooks/useTaskManager";
 import useAI from "../hooks/useAI";
@@ -15,6 +16,7 @@ import {
 } from "lucide-react";
 
 function Dashboard() {
+  const navigate = useNavigate();
   const {
     tasks,
     loading: taskLoading,
@@ -60,7 +62,7 @@ function Dashboard() {
   }, [showInsights]);
 
   const handleLogout = () => {
-    logout();
+    navigate("/login", { replace: true });
     window.location.href = "/login";
   };
 
