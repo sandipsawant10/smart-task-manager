@@ -80,13 +80,27 @@ npm install
 
 Create a `.env` file in the frontend directory:
 
+**For Development:**
+
 ```env
 VITE_API_URL=http://localhost:5000/api
 ```
 
+**For Production:**
+
+```env
+VITE_API_URL=https://smart-task-manager-a621.onrender.com/api
+```
+
+## Live Demo
+
+🚀 **Backend API**: https://smart-task-manager-a621.onrender.com
+
+The backend is deployed and ready to use. Configure your frontend with the production API URL above.
+
 ## Usage
 
-### Start Backend Server
+### Start Backend Server (Local Development)
 
 ```bash
 cd backend
@@ -106,17 +120,21 @@ Opens the app at `http://localhost:5173`
 
 ### Build for Production
 
-Frontend:
+Frontend (Build for deployment):
 
 ```bash
+cd frontend
 npm run build
 ```
 
-Backend:
+Backend (Local production server):
 
 ```bash
+cd backend
 npm start
 ```
+
+> **Note**: The backend is already deployed at https://smart-task-manager-a621.onrender.com
 
 ### Lint Code
 
