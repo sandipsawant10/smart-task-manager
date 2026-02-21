@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   CheckCircle2,
   Edit2,
@@ -8,6 +8,7 @@ import {
   Calendar,
   X,
   Save,
+  MoreVertical,
 } from "lucide-react";
 
 const TaskCard = ({
@@ -30,6 +31,8 @@ const TaskCard = ({
     task.deadline ? task.deadline.slice(0, 10) : "",
   );
   const [isLoading, setIsLoading] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const menuRef = useRef(null);
 
   useEffect(() => {
     setEditTitle(task.title || "");
@@ -37,6 +40,21 @@ const TaskCard = ({
     setEditPriority(task.priority || "low");
     setEditDeadline(task.deadline ? task.deadline.slice(0, 10) : "");
   }, [task]);
+
+  // Close menu on click outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMenu(false);
+      }
+    };
+
+    if (showMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [showMenu]);
 
   const handleSave = async () => {
     if (!editTitle.trim() || isLoading) {
@@ -101,90 +119,58 @@ const TaskCard = ({
     setIsLoading(false);
   };
 
-  const getPriorityColor = (priority) => {
-    switch (priority) {
-      case "high":
-        return "bg-red-100 text-red-700 border-red-200/50";
-      case "medium":
-        return "bg-amber-100 text-amber-700 border-amber-200/50";
-      case "low":
-        return "bg-emerald-100 text-emerald-700 border-emerald-200/50";
-      default:
-        return "bg-slate-100 text-slate-600 border-slate-200/50";
-    }
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "completed":
-        return "bg-emerald-100 text-emerald-700 border-emerald-200/50";
-      case "pending":
-        return "bg-slate-100 text-slate-600 border-slate-200/50";
-      default:
-        return "bg-slate-100 text-slate-600 border-slate-200/50";
-    }
-  };
-
   const isCompleted = task.status === "completed";
 
   return (
-    <li className="list-none">
+    <li>
       {isEditing ? (
-        <div className="group relative overflow-hidden rounded-xl border border-slate-200/60 bg-gradient-to-br from-white to-slate-50/40 shadow-sm transition-all duration-300">
-          <div className="absolute inset-0 -z-10 bg-gradient-to-br from-cyan-50/30 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-          
-          <div className="space-y-5 p-6">
+        <div className="task-card">
+          <div className="form-card">
             {/* Edit Header */}
-            <div className="flex items-center justify-between border-b border-slate-200/50 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-cyan-100/50 p-2">
-                  <Edit2 className="h-4 w-4 text-cyan-600" strokeWidth={2.5} />
+            <div className="form-header">
+              <div className="form-title">
+                <div className="icon-pill">
+                  <Edit2 strokeWidth={2} />
                 </div>
-                <h4 className="text-sm font-bold text-slate-900">Edit Task</h4>
+                <h4>Edit Task</h4>
               </div>
               <button
+                className="btn btn-ghost"
                 onClick={handleCancel}
                 disabled={isLoading}
-                className="rounded-lg p-1.5 text-slate-400 transition-all duration-200 hover:bg-slate-100 hover:text-slate-600 disabled:opacity-50"
               >
-                <X className="h-4 w-4" strokeWidth={2.5} />
+                <X strokeWidth={2} />
               </button>
             </div>
 
             {/* Form Fields */}
-            <div>
-              <label className="mb-2.5 block text-xs font-bold uppercase tracking-widest text-slate-600">
-                Title
-              </label>
+            <div className="field">
+              <label className="field-label">Title</label>
               <input
+                className="field-input"
                 type="text"
                 value={editTitle}
                 onChange={(event) => setEditTitle(event.target.value)}
-                className="w-full rounded-lg border border-slate-200/60 bg-white/60 px-4 py-3 text-sm font-normal text-slate-900 transition-all duration-200 focus:border-cyan-400/70 focus:bg-white focus:outline-none focus:ring-2 focus:ring-cyan-200/50"
               />
             </div>
 
-            <div>
-              <label className="mb-2.5 block text-xs font-bold uppercase tracking-widest text-slate-600">
-                Description
-              </label>
+            <div className="field">
+              <label className="field-label">Description</label>
               <input
+                className="field-input"
                 type="text"
                 value={editDescription}
                 onChange={(event) => setEditDescription(event.target.value)}
-                className="w-full rounded-lg border border-slate-200/60 bg-white/60 px-4 py-3 text-sm font-normal text-slate-900 transition-all duration-200 focus:border-cyan-400/70 focus:bg-white focus:outline-none focus:ring-2 focus:ring-cyan-200/50"
               />
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className="mb-2.5 block text-xs font-bold uppercase tracking-widest text-slate-600">
-                  Priority
-                </label>
+            <div className="field-row">
+              <div className="field">
+                <label className="field-label">Priority</label>
                 <select
+                  className="field-input"
                   value={editPriority}
                   onChange={(event) => setEditPriority(event.target.value)}
-                  className="w-full rounded-lg border border-slate-200/60 bg-white/60 px-4 py-3 text-sm font-medium text-slate-900 transition-all duration-200 focus:border-cyan-400/70 focus:bg-white focus:outline-none focus:ring-2 focus:ring-cyan-200/50"
                 >
                   <option value="low">Low Priority</option>
                   <option value="medium">Medium Priority</option>
@@ -192,37 +178,32 @@ const TaskCard = ({
                 </select>
               </div>
 
-              <div>
-                <label className="mb-2.5 block text-xs font-bold uppercase tracking-widest text-slate-600">
-                  Deadline
-                </label>
+              <div className="field">
+                <label className="field-label">Deadline</label>
                 <input
+                  className="field-input"
                   type="date"
                   value={editDeadline}
                   min={new Date().toISOString().split("T")[0]}
                   onChange={(event) => setEditDeadline(event.target.value)}
-                  className="w-full rounded-lg border border-slate-200/60 bg-white/60 px-4 py-3 text-sm font-medium text-slate-900 transition-all duration-200 focus:border-cyan-400/70 focus:bg-white focus:outline-none focus:ring-2 focus:ring-cyan-200/50"
                 />
               </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-3 border-t border-slate-200/50 pt-5">
+            <div className="task-actions">
               <button
+                className="btn btn-primary"
                 onClick={handleSave}
                 disabled={isLoading}
-                className="group/save flex-1 relative overflow-hidden rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 px-4 py-3 text-sm font-bold text-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md hover:shadow-cyan-500/20 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-cyan-700 to-blue-700 opacity-0 transition-opacity duration-300 group-hover/save:opacity-100" />
-                <div className="relative flex items-center justify-center gap-2">
-                  <Save className="h-4 w-4" strokeWidth={2.5} />
-                  Save Changes
-                </div>
+                <Save strokeWidth={2} />
+                Save Changes
               </button>
               <button
+                className="btn"
                 onClick={handleCancel}
                 disabled={isLoading}
-                className="flex-1 rounded-lg border border-slate-200/60 bg-white px-4 py-3 text-sm font-bold text-slate-700 transition-all duration-200 hover:border-slate-300/60 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -230,119 +211,119 @@ const TaskCard = ({
           </div>
         </div>
       ) : (
-        <div className={`group relative overflow-hidden rounded-xl border border-slate-200/50 bg-gradient-to-br from-white to-slate-50/30 shadow-sm transition-all duration-300 hover:border-slate-300/60 hover:shadow-md ${
-          isCompleted ? "border-emerald-200/40 bg-gradient-to-br from-emerald-50/60 to-emerald-50/20" : ""
-        }`}>
-          <div className={`absolute inset-0 -z-10 opacity-0 transition-opacity duration-300 group-hover:opacity-100 ${
-            isCompleted
-              ? "bg-gradient-to-br from-emerald-50/50 to-transparent"
-              : "bg-gradient-to-br from-blue-50/30 to-transparent"
-          }`} />
-          
-          <div className="space-y-5 p-6">
-            {/* Task Content */}
-            <div className="min-w-0">
-              <h3 className={`text-base font-bold tracking-tight transition-all duration-300 ${
-                isCompleted 
-                  ? "text-slate-400 line-through" 
-                  : "text-slate-950"
-              }`}>
-                {task.title}
-              </h3>
+        <div className={`task-card ${isCompleted ? "task-card--done" : ""}`}>
+          <div>
+            {/* Task Header with 3-dot menu */}
+            <div className="task-card__head">
+              <div>
+                <h3 className="task-card__title">{task.title}</h3>
 
-              {task.description && (
-                <p className={`mt-2 line-clamp-2 text-sm transition-all duration-300 ${
-                  isCompleted
-                    ? "text-slate-400"
-                    : "text-slate-600"
-                }`}>
-                  {task.description}
-                </p>
-              )}
+                {task.description && (
+                  <p className="task-card__desc">{task.description}</p>
+                )}
+              </div>
 
-              {/* Badges & Metadata */}
-              <div className="mt-4 flex flex-wrap gap-2.5">
-                {/* Priority Badge */}
-                <span className={`inline-flex items-center rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-all duration-200 ${getPriorityColor(task.priority)}`}>
-                  <span className="mr-1.5 h-1.5 w-1.5 rounded-full bg-current opacity-70" />
-                  {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
-                </span>
+              {/* 3-dot Menu */}
+              <div className="task-menu" ref={menuRef}>
+                <button
+                  className="btn btn-ghost"
+                  onClick={() => setShowMenu(!showMenu)}
+                >
+                  <MoreVertical strokeWidth={2} />
+                </button>
 
-                {/* Status Badge */}
-                <span className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-all duration-200 ${getStatusColor(task.status)}`}>
-                  <CheckCircle2 className="h-3.5 w-3.5" strokeWidth={2} />
-                  {task.status === "completed" ? "✓ Done" : "Pending"}
-                </span>
-
-                {/* Deadline Badge */}
-                {task.deadline && (
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/60 bg-slate-50/70 px-3.5 py-1.5 text-xs font-semibold text-slate-600 transition-all duration-200 hover:bg-slate-100/70">
-                    <Calendar className="h-3.5 w-3.5" strokeWidth={2} />
-                    {new Date(task.deadline).toLocaleDateString()}
-                  </span>
+                {showMenu && (
+                  <div className="task-menu__panel">
+                    <button
+                      onClick={() => {
+                        onEdit();
+                        setShowMenu(false);
+                      }}
+                      disabled={isLoading}
+                      className="task-menu__item"
+                    >
+                      <Edit2 strokeWidth={2} />
+                      Edit Task
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleSuggestPriority();
+                        setShowMenu(false);
+                      }}
+                      disabled={isLoading}
+                      className="task-menu__item"
+                    >
+                      <Zap strokeWidth={2} />
+                      Suggest Priority
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleSuggestDeadline();
+                        setShowMenu(false);
+                      }}
+                      disabled={isLoading}
+                      className="task-menu__item"
+                    >
+                      <Clock strokeWidth={2} />
+                      Suggest Deadline
+                    </button>
+                    <div className="task-menu__divider" />
+                    <button
+                      onClick={() => {
+                        handleDelete();
+                        setShowMenu(false);
+                      }}
+                      disabled={isLoading}
+                      className="task-menu__item task-menu__item--danger"
+                    >
+                      <Trash2 strokeWidth={2} />
+                      Delete Task
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-wrap gap-2 border-t border-slate-200/50 pt-4">
+            {/* Badges & Metadata */}
+            <div className="task-chips">
+              {/* Priority Badge */}
+              <span className={`task-chip task-chip--${task.priority}`}>
+                {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+              </span>
+
+              {/* Deadline */}
+              {task.deadline && (
+                <span className="task-meta">
+                  <Calendar strokeWidth={2} />
+                  {new Date(task.deadline).toLocaleDateString()}
+                </span>
+              )}
+
+              {/* Status Icon Only */}
+              {isCompleted && (
+                <span className="task-chip task-chip--done">
+                  <CheckCircle2 strokeWidth={2} />
+                  Done
+                </span>
+              )}
+            </div>
+
+            {/* Complete Button */}
+            {!isCompleted && (
               <button
+                className="btn"
                 onClick={handleComplete}
                 disabled={isLoading}
-                className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-bold transition-all duration-200 ${
-                  isCompleted
-                    ? "border border-emerald-200/60 bg-emerald-50/70 text-emerald-700 hover:bg-emerald-100/70"
-                    : "border border-emerald-200/40 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100/60 hover:border-emerald-200/60"
-                } disabled:cursor-not-allowed disabled:opacity-50`}
               >
-                <CheckCircle2 className="h-3.5 w-3.5" strokeWidth={2.5} />
-                <span>{isCompleted ? "Completed" : "Mark Done"}</span>
+                <CheckCircle2 strokeWidth={2} />
+                <span>Mark Complete</span>
               </button>
-
-              <button
-                onClick={onEdit}
-                disabled={isLoading}
-                className="inline-flex items-center gap-2 rounded-lg border border-slate-200/60 bg-slate-50/70 px-3.5 py-2 text-xs font-bold text-slate-700 transition-all duration-200 hover:border-slate-300/60 hover:bg-slate-100/70 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <Edit2 className="h-3.5 w-3.5" strokeWidth={2.5} />
-                <span>Edit</span>
-              </button>
-
-              <button
-                onClick={handleDelete}
-                disabled={isLoading}
-                className="inline-flex items-center gap-2 rounded-lg border border-red-200/60 bg-red-50/70 px-3.5 py-2 text-xs font-bold text-red-700 transition-all duration-200 hover:border-red-200/80 hover:bg-red-100/70 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <Trash2 className="h-3.5 w-3.5" strokeWidth={2.5} />
-                <span>Delete</span>
-              </button>
-
-              <button
-                onClick={handleSuggestPriority}
-                disabled={isLoading}
-                className="inline-flex items-center gap-2 rounded-lg border border-amber-200/60 bg-amber-50/70 px-3.5 py-2 text-xs font-bold text-amber-700 transition-all duration-200 hover:border-amber-200/80 hover:bg-amber-100/70 disabled:cursor-not-allowed disabled:opacity-50"
-                title="Get AI-powered priority suggestion"
-              >
-                <Zap className="h-3.5 w-3.5" strokeWidth={2.5} />
-                <span>Priority</span>
-              </button>
-
-              <button
-                onClick={handleSuggestDeadline}
-                disabled={isLoading}
-                className="inline-flex items-center gap-2 rounded-lg border border-sky-200/60 bg-sky-50/70 px-3.5 py-2 text-xs font-bold text-sky-700 transition-all duration-200 hover:border-sky-200/80 hover:bg-sky-100/70 disabled:cursor-not-allowed disabled:opacity-50"
-                title="Get AI-powered deadline suggestion"
-              >
-                <Clock className="h-3.5 w-3.5" strokeWidth={2.5} />
-                <span>Deadline</span>
-              </button>
-            </div>
+            )}
           </div>
         </div>
       )}
     </li>
   );
-};
 };
 
 export default TaskCard;
